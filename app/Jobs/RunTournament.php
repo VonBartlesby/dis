@@ -59,14 +59,28 @@ class RunTournament implements ShouldQueue
         //echo($pathMine);
         $ref = $zip->open($pathMine,ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-
+        $path = Storage::path('docker') . '/' . $game->name;
         foreach($validUsers as $i){
             foreach($validUsers as $j){
                 if(!($i->id == $j->id)){
-                    $process = new Process(['python',Storage::path('public') . '/'.$game->name.'/'.$game->name.'.py',$i->id,$j->id]);
+                    if(Storage::exists('docker/'.$game->name.'/player1.py')){
+                        Storage::delete('docker/'.$game->name.'/player1.py');
+                    }
+                    if(Storage::exists('docker/'.$game->name.'/player2.py')){
+                        Storage::delete('docker/'.$game->name.'/player2.py');
+                    }
+                    echo $j->user_id . "\n";
+                    echo $i->user_id . "\n";
+                    Storage::copy('docker/'.$game->name.'/'.$j->user_id.'.py', 'docker/'.$game->name.'/player1.py');
+                    Storage::copy('docker/'.$game->name.'/'.$i->user_id.'.py', 'docker/'.$game->name.'/player2.py');
+
+                    //$process = new Process(['python',Storage::path('public') . '/'.$game->name.'/'.$game->name.'.py',$i->id,$j->id]);
+                    $dockerUp = new Process(['docker','build','--tag','current',$path]);
+                    $dockerUp->mustRun();
+                    $dockerRun = new Process(['docker','run','current']);
                     try{
-                        $process->mustRun();
-                        $outputFull = $process->getOutput();
+                        $dockerRun->mustRun();
+                        $outputFull = $dockerRun->getOutput();
 
                         //Storage::disk('public')->put('Gomoku/tournament'.$tournament->name.'/'. $i.'_vs_'.$j.'.txt', $outputFull);
                         //Storage::disk('public')->put('Gomoku/Results/file.txt', $fill);
@@ -115,36 +129,56 @@ class RunTournament implements ShouldQueue
 
 
     private function validateUser($tournament,$user){
+
         $gamesNum = 3;
         $wins = 0;
         $userId = $user->id;
+        echo 'validating : ' . $userId . "\n";
         $game = Game::findOrFail($tournament->game_id);
 
-        try{
-            $files = Storage::path('public') . '/'.$game->name.'/'.$game->name.'.py';
-            $file = Storage::files('Gomoku');
-            $read = fopen($files,'r+');
-        }catch(Exception $error){
-            dd($error);
+        //$process = new Process(['python',Storage::path('public') . '/'.$game->name.'/'.$game->name.'.py','GomokuAgentRand',$userId]);
+
+        if(Storage::exists('docker/'.$game->name.'/player1.py')){
+            Storage::delete('docker/'.$game->name.'/player1.py');
+        }
+        if(Storage::exists('docker/'.$game->name.'/player2.py')){
+            Storage::delete('docker/'.$game->name.'/player2.py');
         }
 
-        $process = new Process(['python',Storage::path('public') . '/'.$game->name.'/'.$game->name.'.py','GomokuAgentRand',$userId]);
+        Storage::copy('docker/'.$game->name.'/rand.py', 'docker/'.$game->name.'/player1.py');
+        Storage::copy('docker/'.$game->name.'/'.$userId.'.py', 'docker/'.$game->name.'/player2.py');
+
+        $path = Storage::path('docker') . '/' . $game->name;
+
+        $dockerUp = new Process(['docker','build','--tag','current',$path]);
+        $dockerUp->mustRun();
+        $dockerRun = new Process(['docker','run','current']);
+
+
 
 
         for($i = 0;$i<$gamesNum;$i++){
+            echo 'game: ' . $i;
             try{
-                $process->mustRun();
-                $fill = $process->getOutput();
-                $len = strlen($fill);
-                $output = $fill[$len-3];
+                $dockerRun->mustRun();
+                $output = $dockerRun->getOutput();
+                $len = strlen($output);
+                $output = $output[$len-3];
                 if($output == '-'){
+                    echo "     won\n";
                     $wins++;
+                }else{
+                    echo "     lost\n";
                 }
             }catch (Exception $exception){
                 $output = $exception->getMessage();
                 dd($exception);
             }
         }
+        echo "will delete\n";
+        $dockerDown =  new Process(['docker','rmi','current','--force']);
+        $dockerDown->mustRun();
+        echo "has deleted\n";
         return $wins == $gamesNum;
     }
 

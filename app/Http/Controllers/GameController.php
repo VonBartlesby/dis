@@ -15,9 +15,6 @@ use ZipArchive;
 class GameController extends Controller
 {
     public function runRand(){
-
-        $test = new Process(['docker','help']);
-        $test->mustRun();
         $dockerUp = new Process(['docker','build','--tag','current','/home/vagrant/code/dis/app/Http/Controllers/docker/go-docker']);
         $dockerUp->mustRun();
         $dockerRun = new Process(['docker','run','current']);
@@ -69,9 +66,9 @@ class GameController extends Controller
 
     public function show($id){
         $game = Game::findOrFail($id);
-
+        $errors = [];
         $file = Storage::url('/'.$game->name.'/'.$game->name.'.zip');
-        return view('games.show',['game' => $game,'file' => $file]);
+        return view('games.show',['game' => $game,'file' => $file,'uploadError'=>$errors]);
     }
 
     public function store(Request $request){
