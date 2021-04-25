@@ -15,6 +15,18 @@ use ZipArchive;
 class GameController extends Controller
 {
     public function runRand(){
+
+        $test = new Process(['docker','help']);
+        $test->mustRun();
+        $dockerUp = new Process(['docker','build','--tag','current','/home/vagrant/code/dis/app/Http/Controllers/docker/go-docker']);
+        $dockerUp->mustRun();
+        $dockerRun = new Process(['docker','run','current']);
+        $dockerRun->mustRun();
+        $output = $dockerRun->getOutput();
+        $dockerDown =  new Process(['docker','rmi','current','--force']);
+        $dockerDown->mustRun();
+        return $output;
+        /*
         try{
             $files = Storage::path('public') . '/Gomoku/Gomoku.py';
             //dd($files);
@@ -44,6 +56,7 @@ class GameController extends Controller
         //$zip->close();
         //dd($fill[$len-3]);
         return $fill;
+        */
     }
 
     public function index(){
