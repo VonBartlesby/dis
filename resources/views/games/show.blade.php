@@ -20,29 +20,33 @@
     @else
         <p>Upload your AI</p>
     @endif
+
+
+    <form method="POST" action={{route('gameStore')}} enctype="multipart/form-data">
+        @csrf
+        @if ($errors->any())
+            <div>
+                Errors:
+                <ul>
+                    @foreach ($errors->all() as $error)
+                    <li> {{$error}}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        @if($uploadError)
+            <p style='color:red'>Invalid upload</p>
+
+        @endif
+        <p>UploadFile: <input type="file" name="file" class="form-control"></p>
+
+        <input type="submit" value="Submit">
+        <input type="hidden" name="id" value="{{$game->id}}">
+    </form>
+@else
+    <p>You must be logged in to Upload an AI solution</p>
+
 @endif
-
-<form method="POST" action={{route('gameStore')}} enctype="multipart/form-data">
-    @csrf
-    @if ($errors->any())
-        <div>
-            Errors:
-            <ul>
-                @foreach ($errors->all() as $error)
-                   <li> {{$error}}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-    @if($uploadError)
-        <p style='color:red'>Invalid upload</p>
-
-    @endif
-    <p>UploadFile: <input type="file" name="file" class="form-control"></p>
-
-    <input type="submit" value="Submit">
-    <input type="hidden" name="id" value="{{$game->id}}">
-</form>
 
 @foreach ($game->tournaments as $tourny)
 <ul>

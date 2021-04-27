@@ -75,10 +75,10 @@ class GameController extends Controller
         $validateData = $request->validate([
             'file'=> 'required',
         ]);
+        if(!Auth::check()){
+            return 'you must be logged in to upload code';
+        }
         //dd($request);
-
-
-        $request->file->storeAs('Gomoku','test.py');
 
         $game = Game::findOrFail($request->id);
 

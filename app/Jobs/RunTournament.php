@@ -85,7 +85,7 @@ class RunTournament implements ShouldQueue
                         //Storage::disk('public')->put('Gomoku/tournament'.$tournament->name.'/'. $i.'_vs_'.$j.'.txt', $outputFull);
                         //Storage::disk('public')->put('Gomoku/Results/file.txt', $fill);
                         $fileName = $i->user_id.'_vs_'.$j->user_id.'.txt';
-                        echo($fileName);
+
                         //echo($fileDir);
                         //echo('/n');
                         //Storage::disk('public')->put($fileDir, $outputFull);

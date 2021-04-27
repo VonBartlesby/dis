@@ -30,5 +30,14 @@ class TournamentUserSeeder extends Seeder
             'user_id' =>4,
             'tournament_id' =>1
         ]);
+
+        TournamentUser::create([
+            'user_id' =>1,
+            'tournament_id' =>2
+        ]);
+        TournamentUser::create([
+            'user_id' =>2,
+            'tournament_id' =>2
+        ]);
     }
 }

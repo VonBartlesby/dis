@@ -193,7 +193,7 @@ class TournamentController extends Controller
         }
         $job = new RunTournament($id);
         $job->dispatch($id);
-        return redirect()->route('tournamentShow', ['id' => 1]);
+        return redirect()->route('tournamentShow', ['id' => $id]);
     }
 
     public function create(){

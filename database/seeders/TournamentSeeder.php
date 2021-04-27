@@ -25,5 +25,13 @@ class TournamentSeeder extends Seeder
             'user_id' =>1,
             'deadline' => DateTime::createFromFormat($format,$date),
         ]);
+        Tournament::create([
+            'name' => 'Tic Tac Toe',
+            'is_private' => false,
+            'max_users' => 2,
+            'game_id' =>2,
+            'user_id' =>1,
+            'deadline' => DateTime::createFromFormat($format,$date),
+        ]);
     }
 }
