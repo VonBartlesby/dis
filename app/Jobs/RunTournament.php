@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -44,6 +45,10 @@ class RunTournament implements ShouldQueue
         $tournament = Tournament::findOrFail($this->id);
         $game = $tournament->game;
         $enteredUsers = $tournament->users;
+        if($tournament->is_complete){
+            echo "this tournament has already been run";
+            return 1;
+        }
         foreach($enteredUsers as $user){
             if($this->validateUser($tournament,$user)){
                 $gamer = TournamentUser::where('user_id','=',$user->id)->where('tournament_id','=',$this->id)->first();
@@ -76,23 +81,28 @@ class RunTournament implements ShouldQueue
 
                     //$process = new Process(['python',Storage::path('public') . '/'.$game->name.'/'.$game->name.'.py',$i->id,$j->id]);
                     $dockerUp = new Process(['docker','build','--tag','current',$path]);
-                    $dockerUp->mustRun();
+                    $dockerUp->setTimeout(3600);
+                    $dockerUp->run();
                     $dockerRun = new Process(['docker','run','current']);
+                    $dockerRun->setTimeout(3600);
                     try{
-                        $dockerRun->mustRun();
+                        $dockerRun->run();
                         $outputFull = $dockerRun->getOutput();
 
                         //Storage::disk('public')->put('Gomoku/tournament'.$tournament->name.'/'. $i.'_vs_'.$j.'.txt', $outputFull);
                         //Storage::disk('public')->put('Gomoku/Results/file.txt', $fill);
-                        $fileName = $i->user_id.'_vs_'.$j->user_id.'.txt';
+                        $userI = User::findOrFail($i->user_id);
+                        $userJ = User::findOrFail($j->user_id);
+                        $fileName = $userI->name.'_vs_'.$userJ->name.'.txt';
 
                         //echo($fileDir);
                         //echo('/n');
                         //Storage::disk('public')->put($fileDir, $outputFull);
                         if($ref){
                             $zip->addFromString($fileName,$outputFull);
+                            echo("created output in zip\n");
                         }else{
-                            echo('failed to create zip');
+                            echo("failed to create in zip\n");
                         }
 
 
@@ -117,7 +127,8 @@ class RunTournament implements ShouldQueue
                             $player2->save();
                         }
                     }catch (Exception $exception){
-                        throw($exception);
+                        echo "Game failed to run";
+                        echo $exception->getMessage();
                     }
                 }
             }
@@ -151,16 +162,17 @@ class RunTournament implements ShouldQueue
         $path = Storage::path('docker') . '/' . $game->name;
 
         $dockerUp = new Process(['docker','build','--tag','current',$path]);
-        $dockerUp->mustRun();
+        $dockerUp->setTimeout(3600);
+        $dockerUp->run();
         $dockerRun = new Process(['docker','run','current']);
-
+        $dockerRun->setTimeout(3600);
 
 
 
         for($i = 0;$i<$gamesNum;$i++){
             echo 'game: ' . $i;
             try{
-                $dockerRun->mustRun();
+                $dockerRun->run();
                 $output = $dockerRun->getOutput();
                 $len = strlen($output);
                 $output = $output[$len-3];
@@ -177,7 +189,8 @@ class RunTournament implements ShouldQueue
         }
         echo "will delete\n";
         $dockerDown =  new Process(['docker','rmi','current','--force']);
-        $dockerDown->mustRun();
+        $dockerDown->setTimeout(3600);
+        $dockerDown->run();
         echo "has deleted\n";
         return $wins == $gamesNum;
     }

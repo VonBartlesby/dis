@@ -20,24 +20,6 @@ class UserSeeder extends Seeder
             'email' => 'nathan@email.com',
             'password' => Hash::make('helloworld'),
         ]);
-
-        User::create([
-            'name' => 'A',
-            'email' => 'A@email.com',
-            'password' => Hash::make('helloworld'),
-        ]);
-
-        User::create([
-            'name' => 'B',
-            'email' => 'B@email.com',
-            'password' => Hash::make('helloworld'),
-        ]);
-
-        User::create([
-            'name' => 'C',
-            'email' => 'C@email.com',
-            'password' => Hash::make('helloworld'),
-        ]);
         User::factory()->count(20)->create();
     }
 }

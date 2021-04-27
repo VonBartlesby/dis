@@ -14,22 +14,19 @@ class TournamentUserSeeder extends Seeder
      */
     public function run()
     {
-        TournamentUser::create([
-            'user_id' =>1,
-            'tournament_id' =>1
-        ]);
-        TournamentUser::create([
-            'user_id' =>2,
-            'tournament_id' =>1
-        ]);
-        TournamentUser::create([
-            'user_id' =>3,
-            'tournament_id' =>1
-        ]);
-        TournamentUser::create([
-            'user_id' =>4,
-            'tournament_id' =>1
-        ]);
+
+        for($i = 1;$i<21;$i++){
+            TournamentUser::create([
+                'user_id' =>$i,
+                'tournament_id' =>1
+            ]);
+        }
+
+
+
+
+
+
 
         TournamentUser::create([
             'user_id' =>1,

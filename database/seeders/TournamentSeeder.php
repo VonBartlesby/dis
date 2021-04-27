@@ -20,7 +20,7 @@ class TournamentSeeder extends Seeder
         Tournament::create([
             'name' => 'Ai class coursework tournmy',
             'is_private' => false,
-            'max_users' => 8,
+            'max_users' => 30,
             'game_id' =>1,
             'user_id' =>1,
             'deadline' => DateTime::createFromFormat($format,$date),
